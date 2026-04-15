@@ -27,8 +27,8 @@ export class Basket {
 
     //получение стоимости всех товаров в корзине;
     getTotalPrice(items: IProduct[]): number {
-        return this.items.reduce((total, item) => {
-            return total + item.price;
+        return items.reduce((total, item) => {
+            return total + (item.price || 0);
         }, 0)
     }
 

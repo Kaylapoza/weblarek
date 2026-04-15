@@ -22,3 +22,15 @@ export interface IBuyer {
   phone: string;
   address: string;
 }
+
+//тип для получения данных с сервера
+export type ProductRequest = {
+  total: number,
+  items: IProduct[]
+}
+
+//тип для отправки данных на сервер при заказе
+export type OrderRequest = IBuyer & {
+  total: number,
+  items: IProduct['id'][]
+}
