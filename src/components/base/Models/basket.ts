@@ -3,7 +3,7 @@ import { IProduct } from "../../../types";
 export class Basket {
     private items: IProduct[] = [];
     
-    getItems(): IProduct[] | null {
+    getItems(): IProduct[] {
         return this.items; //    получение массива товаров, которые находятся в корзине;
     }
 
@@ -13,11 +13,8 @@ export class Basket {
     }
 
     //удаление товара, полученного в параметре из массива корзины;
-    removeItem(item: IProduct): void {
-        const index: number = this.items.indexOf(item)
-        if (index !== -1) {
-            this.items.slice(index, 1)
-        }
+    removeItem(id: string): void {
+        this.items = this.items.filter(item => item.id !== id)
     }
 
     //очистка корзины;

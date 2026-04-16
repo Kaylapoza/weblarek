@@ -1,4 +1,4 @@
-import { IApi, IProduct, OrderRequest, ProductRequest } from "../../types";
+import { IApi, OrderRequest, OrderResponse, ProductResponse } from "../../types";
 
 
 export class RequestService {
@@ -8,11 +8,11 @@ export class RequestService {
         this.api = api;
     }
 
-    getProducts(): Promise<IProduct[]> {
-        return this.api.get<ProductRequest>('/product/').then((data) => data.items)
+    getProducts(): Promise<ProductResponse> {
+        return this.api.get<ProductResponse>('/product/');
     }
 
-    postOrder(order: OrderRequest): Promise<OrderRequest> {
-        return this.api.post<OrderRequest>('/order/', order)
+    postOrder(order: OrderRequest): Promise<OrderResponse> {
+        return this.api.post<OrderResponse>('/order/', order)
     }
 }

@@ -1,11 +1,4 @@
-import { IBuyer, TPayment } from "../../../types";
-
-interface ValidationErrors {
-    payment?: string;
-    address?: string;
-    phone?: string;
-    email?: string;
-}
+import { IBuyer, TPayment, ValidationErrors } from "../../../types";
 
 export class Buyer {
     private payment: TPayment;
@@ -13,11 +6,11 @@ export class Buyer {
     private phone: string;
     private email: string;
 
-    constructor(payment: TPayment, address: string, phone: string, email: string) {
-        this.payment = payment;
-        this.address = address;
-        this.phone = phone;
-        this.email = email;
+    constructor() {
+        this.payment = '';
+        this.address = '';
+        this.phone = '';
+        this.email = '';
     }
 
     //сохранение данных в модели. Один ощий метод
@@ -57,16 +50,16 @@ export class Buyer {
     //валидация данных. Метод, возвращающий объект с ошибками.
     validate(): ValidationErrors {
         let errors: ValidationErrors = {};
-        if (this.payment === '') {
+        if (!this.payment) {
             errors.payment = 'Не выбран способ оплаты';
         }
-        if (this.address === '') {
+        if (!this.address) {
             errors.address = 'Адресс не указан';
         }
-        if (this.phone === '') {
+        if (!this.phone) {
             errors.phone = 'Телефон не указан';
         }
-        if (this.email === '') {
+        if (!this.email) {
             errors.email = 'Email не указан'
         }
         return errors;
