@@ -1,4 +1,4 @@
-import { IProduct } from "../../../types";
+import { IProduct } from "../../types";
 
 export class Basket {
     private items: IProduct[] = [];
@@ -23,11 +23,9 @@ export class Basket {
     }
 
     //получение стоимости всех товаров в корзине;
-    getTotalPrice(items: IProduct[]): number {
-        return items.reduce((total, item) => {
-            return total + (item.price || 0);
-        }, 0)
-    }
+    getTotal() {
+    return this.items.reduce((total, item) => total+ (item.price || 0), 0);
+  }
 
     //получение количества товаров в корзине;
     getItemCount(): number {
