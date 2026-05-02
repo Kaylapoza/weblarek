@@ -2,7 +2,7 @@ import { categoryMap } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
 import { Card, ICard } from "./card";
 
-interface ICatalogCard extends ICard {
+export interface ICatalogCard extends ICard {
     category: string,
     image: string
 }

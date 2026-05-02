@@ -226,11 +226,11 @@ Presenter - презентер содержит основную логику п
 `description: string` - подробное описание товара
 
 #### Класс CardPreview  
-Детальное отображение товара в модальном окне. Наследует: Card<IPreviewData>  
+Детальное отображение товара в модальном окне. Наследует: Card<ICardPreview>  
 
 Методы:  
-`set category(value: string)` - устанавливает категорию товара  
-`set image(value: string)` -  устанавливает ссылку на изображение в DOM  
+`set buttonText(value: string)` - устанавливает текст кнопки
+`set valid(value: boolean)` - делает кнопку активной или неактивной
 `set description(value: string)` - отображает описание товара  
 
 #### Интерфейс ICardBasket extends ICard  

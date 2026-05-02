@@ -4,7 +4,7 @@ import { Basket } from './components/Models/basket';
 import { Buyer } from './components/Models/buyer';
 import { Catalog } from './components/Models/catalog';
 import { RequestService } from './components/RequestService';
-import { CatalogCard } from './components/views/Card/cardCatalog';
+import { CatalogCard } from './components/views/Cards/cardCatalog';
 import './scss/styles.scss';
 import { API_URL } from './utils/constants';
 import { apiProducts } from './utils/data';
