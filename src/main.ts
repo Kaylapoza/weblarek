@@ -1,14 +1,17 @@
 import { Api } from './components/base/Api';
+import { EventEmitter } from './components/base/Events';
 import { Basket } from './components/Models/basket';
 import { Buyer } from './components/Models/buyer';
 import { Catalog } from './components/Models/catalog';
 import { RequestService } from './components/RequestService';
+import { CatalogCard } from './components/views/Card/cardCatalog';
 import './scss/styles.scss';
 import { API_URL } from './utils/constants';
 import { apiProducts } from './utils/data';
+import { cloneTemplate, ensureElement } from './utils/utils';
 
 //тестирование данных, классов и их методов
-
+const events = new EventEmitter();
 const productsModel = new Catalog();
 
 productsModel.saveProducts(apiProducts.items); //метод для сохранения продуктов, полученных из базы данных
@@ -53,11 +56,21 @@ console.log('Валидация формы(без ошибок): ', buyerModel.v
 
 const api = new Api(API_URL);
 const service = new RequestService(api);
+const galleryContainer = ensureElement<HTMLElement>('.gallery');
+const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
 
 service.getProducts() // получаем продукты с сервера
     .then((data) => {
         productsModel.saveProducts(data.items)// затем сохраняем их в класс, отвечающий за хранение данных на главной странице
         console.log('Массив товаров, полученный с сервера: ', productsModel.getProducts());
+        galleryContainer.innerHTML = '';
+        productsModel.getProducts().forEach((item) => {
+            const card = new CatalogCard(cloneTemplate(cardCatalogTemplate), {
+                onClick: () => {events.emit('card:select', item)}
+            })
+            galleryContainer.append(card.render(item));
+        })
+        
     })
     .catch((error) => {
         console.error('Данные не найдены: ', error);
