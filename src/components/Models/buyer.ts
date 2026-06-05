@@ -1,4 +1,5 @@
 import { IBuyer, TPayment, ValidationErrors } from "../../types";
+import { IEvents } from "../base/Events";
 
 export class Buyer {
     private payment: TPayment;
@@ -6,11 +7,13 @@ export class Buyer {
     private phone: string;
     private email: string;
 
-    constructor() {
+    constructor(protected events: IEvents) {
         this.payment = '';
         this.address = '';
         this.phone = '';
         this.email = '';
+
+        this.events = events;
     }
 
     //сохранение данных в модели. Один ощий метод
@@ -27,6 +30,11 @@ export class Buyer {
         if (buyer.email !== undefined) {
             this.email = buyer.email;
         }
+
+        const errors = this.validate(); //вписали сюда валидацию, чтобы пользователь сразу получал актуальную информацию об ошибках
+        this.events.emit('buyer:changed', {data: this.getBuyerData(),
+            errors
+        })
     }
 
     // получение всех данных покупателя;
@@ -45,6 +53,8 @@ export class Buyer {
         this.address = '';
         this.phone = '';
         this.email = '';
+
+        this.events.emit('buyer:cleared');
     }
 
     //валидация данных. Метод, возвращающий объект с ошибками.

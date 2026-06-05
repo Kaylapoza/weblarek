@@ -1,4 +1,4 @@
-import { categoryMap } from "../../../utils/constants";
+import { categoryMap, CDN_URL } from "../../../utils/constants";
 import { ensureElement } from "../../../utils/utils";
 import { Card, ICard } from "./card";
 
@@ -39,6 +39,7 @@ export class CatalogCard extends Card<ICatalogCard> {
         }
     }
     set image(value: string) {
-        this.setImage(this.imageElement, value, this.title);
+        const imageUrl = CDN_URL + value
+        this.setImage(this.imageElement, imageUrl, this.title);
     }
 }

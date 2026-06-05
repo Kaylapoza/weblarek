@@ -12,7 +12,7 @@ import { cloneTemplate, ensureElement } from './utils/utils';
 
 //тестирование данных, классов и их методов
 const events = new EventEmitter();
-const productsModel = new Catalog();
+const productsModel = new Catalog(events);
 
 productsModel.saveProducts(apiProducts.items); //метод для сохранения продуктов, полученных из базы данных
 console.log('Массив товаров из каталога: ', productsModel.getProducts())// метод для получения продуктов, сохраненных  в каталоге
@@ -26,7 +26,7 @@ const savedProduct = productsModel.getCurrentProduct();
 console.log('Сохраненный товар: ', savedProduct);// метод для получения данных сохраненного товара
 
 
-const basketModel = new Basket();
+const basketModel = new Basket(events);
 if (savedProduct) {
     basketModel.addItem(savedProduct);// метод для добавления продукта в корзину
     console.log('Проверка наличия определенного товара в корзине: ', basketModel.hasItemInBasket(savedProduct.id));
@@ -36,7 +36,7 @@ console.log('Количество товаров в корзине: ', basketMod
 console.log('Продукты в корзине: ', basketModel.getItems()); // метод для получения продуктов из корзины
 
 
-const buyerModel = new Buyer();
+const buyerModel = new Buyer(events);
 buyerModel.setBuyerData({
     payment: 'cash',
     address: 'London, Example str., 5'
