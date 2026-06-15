@@ -7,7 +7,7 @@ export interface ICatalogCard extends ICard {
     image: string
 }
 
-interface ICardActions {
+export interface ICardActions {
     onClick: (event: MouseEvent) => void;
 }
 

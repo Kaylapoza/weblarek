@@ -25,6 +25,7 @@ export class Catalog {
 
     saveCurrentProduct(product: IProduct | null): void {
         this.currentProduct = product; //    сохранение товара для подробного отображения;
+        this.events.emit('preview:changed');
     }
 
     getCurrentProduct(): IProduct | null {

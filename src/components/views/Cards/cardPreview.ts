@@ -1,27 +1,27 @@
 import { ensureElement } from "../../../utils/utils";
 import { IEvents } from "../../base/Events";
 import { Card } from "./card";
-import { ICatalogCard } from "./cardCatalog";
+import { ICardActions, ICatalogCard } from "./cardCatalog";
 
 
 interface ICardPreview extends ICatalogCard {
-    description: string;
+    description: string,
+    buttonText?: string,
+    valid?: boolean
 }
 
 export class CardPreview extends Card<ICardPreview> {
     protected textElement: HTMLElement;
     protected buyButton: HTMLButtonElement;
 
-    constructor(container: HTMLElement, protected events: IEvents) {
+    constructor(container: HTMLElement, actions?: ICardActions) {
         super(container);
 
         this.textElement = ensureElement<HTMLElement>('.card__text', this.container);
         this.buyButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
 
-        if (this.buyButton) {
-            this.buyButton.addEventListener('click', () => {
-                this.events.emit('card:add-to-basket');
-            })
+        if (this.buyButton && actions?.onClick) {
+            this.buyButton.addEventListener('click', (e) => actions.onClick(e));
         }
     }
 
@@ -34,6 +34,6 @@ export class CardPreview extends Card<ICardPreview> {
     }
 
     set valid(value: boolean) {
-        this.buyButton.disabled != value;
+        this.buyButton.disabled = !value;
     }
 }
