@@ -1,18 +1,17 @@
-import { IApi, OrderRequest, OrderResponse, ProductResponse } from "../types";
-
+import { IApi, OrderRequest, OrderResponse, ProductResponse } from '../types';
 
 export class RequestService {
-    private api: IApi;
+  private api: IApi;
 
-    constructor(api: IApi) {
-        this.api = api;
-    }
+  constructor(api: IApi) {
+    this.api = api;
+  }
 
-    getProducts(): Promise<ProductResponse> {
-        return this.api.get<ProductResponse>('/product/');
-    }
+  getProducts(): Promise<ProductResponse> {
+    return this.api.get<ProductResponse>('/product/');
+  }
 
-    postOrder(order: OrderRequest): Promise<OrderResponse> {
-        return this.api.post<OrderResponse>('/order/', order)
-    }
+  postOrder(order: OrderRequest): Promise<OrderResponse> {
+    return this.api.post<OrderResponse>('/order/', order);
+  }
 }

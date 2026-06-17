@@ -1,45 +1,51 @@
-import { categoryMap, CDN_URL } from "../../../utils/constants";
-import { ensureElement } from "../../../utils/utils";
-import { Card, ICard } from "./card";
+import { categoryMap, CDN_URL } from '../../../utils/constants';
+import { ensureElement } from '../../../utils/utils';
+import { Card, ICard } from './card';
 
 export interface ICatalogCard extends ICard {
-    category: string,
-    image: string
+  category: string;
+  image: string;
 }
 
 export interface ICardActions {
-    onClick: (event: MouseEvent) => void;
+  onClick: (event: MouseEvent) => void;
 }
 
 type CategoryKey = keyof typeof categoryMap;
 
 export class CatalogCard extends Card<ICatalogCard> {
-    protected categoryElement: HTMLElement;
-    protected imageElement: HTMLImageElement;
+  protected categoryElement: HTMLElement;
+  protected imageElement: HTMLImageElement;
 
-    constructor(container: HTMLElement, actions?: ICardActions) {
-        super(container);
+  constructor(container: HTMLElement, actions?: ICardActions) {
+    super(container);
 
-        this.categoryElement = ensureElement<HTMLElement>('.card__category', this.container);
-        this.imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
+    this.categoryElement = ensureElement<HTMLElement>(
+      '.card__category',
+      this.container
+    );
+    this.imageElement = ensureElement<HTMLImageElement>(
+      '.card__image',
+      this.container
+    );
 
-        if (actions?.onClick) {
-            this.container.addEventListener('click', actions.onClick);
-        }
+    if (actions?.onClick) {
+      this.container.addEventListener('click', actions.onClick);
     }
+  }
 
-    set category(value: string) {
-        this.categoryElement.textContent = value;
+  set category(value: string) {
+    this.categoryElement.textContent = value;
 
-        for (const key in categoryMap) {
-            this.categoryElement.classList.toggle(
-                categoryMap[key as CategoryKey],
-                key === value
-            )
-        }
+    for (const key in categoryMap) {
+      this.categoryElement.classList.toggle(
+        categoryMap[key as CategoryKey],
+        key === value
+      );
     }
-    set image(value: string) {
-        const imageUrl = CDN_URL + value
-        this.setImage(this.imageElement, imageUrl, this.title);
-    }
+  }
+  set image(value: string) {
+    const imageUrl = CDN_URL + value;
+    this.setImage(this.imageElement, imageUrl, this.title);
+  }
 }
