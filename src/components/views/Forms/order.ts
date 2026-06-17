@@ -1,8 +1,9 @@
+import { TPayment } from "../../../types";
 import { ensureElement } from "../../../utils/utils";
 import { IEvents } from "../../base/Events";
 import { Form } from "./form";
 
-interface IOrderForm {
+export interface IOrderForm {
     payment: 'card' | 'cash' | null,
     address: string
 }
@@ -19,15 +20,17 @@ export class Order extends Form<IOrderForm> {
         this.cashBtnElement = ensureElement<HTMLButtonElement>('button[name="cash"]', this.container);
         this.addressInputElement = ensureElement<HTMLInputElement>('.form__input', this.container);
 
-        this.cardBtnElement.addEventListener('click', () => {
-            this.events.emit('order:payment-change', { target: 'card' })
+        this.cardBtnElement.addEventListener('click', (e: Event) => {
+            e.preventDefault();
+            this.events.emit('order:payment-change', { payment: 'card' })
         })
-        this.cashBtnElement.addEventListener('click', () => {
-            this.events.emit('order:payment-change', { target: 'cash' })
+        this.cashBtnElement.addEventListener('click', (e: Event) => {
+            e.preventDefault();
+            this.events.emit('order:payment-change', { payment: 'cash' })
         })
     }
 
-    set payment(value: 'card' | 'cash' | null) {
+    set payment(value: TPayment) {
         this.cardBtnElement.classList.toggle('button_alt-active', value === 'card');
         this.cashBtnElement.classList.toggle('button_alt-active', value === 'cash');
     }
