@@ -10,6 +10,7 @@ import { CatalogCard } from './components/views/Cards/cardCatalog';
 import { CardPreview } from './components/views/Cards/cardPreview';
 import { Contacts } from './components/views/Forms/contacts';
 import { Order } from './components/views/Forms/order';
+import { Gallery } from './components/views/gallery';
 import { Header } from './components/views/header';
 import { Modal } from './components/views/modal';
 import { Success } from './components/views/success';
@@ -36,47 +37,34 @@ const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
 const contactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
 const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 
+const cardPreview = new CardPreview(cloneTemplate(cardPreviewTemplate), {
+  onClick: () => {
+    events.emit('preview:toggle-basket')
+  }
+}) // создаем экземпляр карточки превью, и делаем только одно событие для переключения кнопки
 const basketView = new Basket(cloneTemplate(basketTemplate), events);
 const orderView = new Order(cloneTemplate(orderTemplate), events);
 const contactsView = new Contacts(cloneTemplate(contactsTemplate), events);
 const successView = new Success(cloneTemplate(successTemplate), events);
+const gallery = new Gallery(galleryContainer);
 const modal = new Modal(modalContainer, events); //экземпляр модального окна
 
 // КАТАЛОГ
 events.on('items:changed', () => {
-  galleryContainer.innerHTML = ''; //очищаем контейнер перед выодом
-  //Берем актуальный массив товаров и делаем карточки
-  productsModel.getProducts().forEach((item) => {
+  const galleryCards = productsModel.getProducts().map((item) => {
     const card = new CatalogCard(cloneTemplate(cardCatalogTemplate), {
       onClick: () => {
         events.emit('card:select', item); //вешаем обработчик на каждую карточку
       },
     });
-    galleryContainer.append(card.render(item));
+    return card.render(item)
   });
+  gallery.items = galleryCards;
 });
 
 //клик на карточку в каталоге, сохраняет выбранный товар для дальнейшего подробноо отображения
-events.on('card:select', (item: IProduct) => {
-  productsModel.saveCurrentProduct(item);
-});
-
-//ПРЕВЬЮ КАРТОЧКА
-// Иземенение текущего товара в превью
-events.on('preview:changed', () => {
-  const product = productsModel.getCurrentProduct(); //берем уже сохраненный товар из модели
-  if (!product) return;
-
-  //создали компонент отображения карточки в превью
-  const cardPreview = new CardPreview(cloneTemplate(cardPreviewTemplate), {
-    onClick: () => {
-      if (basketModel.hasItemInBasket(product.id)) {
-        events.emit('basket:delete', product);
-      } else {
-        events.emit('card:add-to-basket', product);
-      }
-    },
-  });
+events.on('card:select', (product: IProduct) => {
+  productsModel.saveCurrentProduct(product);
 
   //определяем состояние кнопки покупки
   let buttonText = 'Купить';
@@ -89,8 +77,7 @@ events.on('preview:changed', () => {
     buttonText = 'Удалить из корзины';
   }
 
-  //Передали данные в сеттеры и зарендерили
-  const previewHTML = cardPreview.render({
+  modal.render({ content: cardPreview.render({
     title: product.title,
     price: product.price,
     category: product.category,
@@ -98,26 +85,23 @@ events.on('preview:changed', () => {
     description: product.description,
     buttonText: buttonText,
     valid: isButtonValid,
-  });
-
-  modal.render({ content: previewHTML });
+  })});
   modal.open();
 });
 
-//КОРЗИНА
-// событие добавления из превью
-events.on('card:add-to-basket', (product: IProduct) => {
-  basketModel.addItem(product);
-  modal.close();
-});
+events.on('preview:toggle-basket', () => {
+  const product = productsModel.getCurrentProduct();
+  if (!product) return;
 
-//событие удаления из корзины
-events.on('basket:delete', (product: IProduct) => {
-  basketModel.removeItem(product.id);
-  if (productsModel.getCurrentProduct()?.id === product.id) {
-    modal.close();
+  if (basketModel.hasItemInBasket(product.id)) {
+    basketModel.removeItem(product.id) //если товар в корзине есть - удаляем
+    cardPreview.render({ buttonText: 'Купить'}) // и сразу перерисовываем текст кнопки
+  } else {
+    basketModel.addItem(product) //  впротивном случае добавляем товар в корзину
+    cardPreview.render({buttonText: 'Удалить из корзины'}); // и снова меняем кнопку
   }
-});
+
+})
 
 //функция рендеринга товаров в корзине. Вынес в отдельную функцию так как код используется и при открытии и при изменении корзины
 function renderBasketItems() {
@@ -142,6 +126,11 @@ function renderBasketItems() {
   basketView.active = items.length > 0;
 }
 
+//события на удалениетовара из корзины
+events.on('basket:delete', (item: IProduct) => {
+  basketModel.removeItem(item.id)
+})
+
 //событие изменения в корзине
 events.on('basket:change', () => {
   header.counter = basketModel.getItemCount();
@@ -151,10 +140,8 @@ events.on('basket:change', () => {
 
 // сбытие открытия корзины
 events.on('basket:open', () => {
-  renderBasketItems();
-
-  modal.render({ content: basketView.render() });
-  modal.open();
+  modal.render({content: basketView.render()})
+  modal.open()
 });
 
 //Шаг 1. Заказ. Способ оплаты и адрес
@@ -164,11 +151,7 @@ events.on('order:open', () => {
 
   //стартовое пустое состояние формы
   modal.render({
-    content: orderView.render({
-      address: '',
-      valid: false,
-      errors: [],
-    }),
+    content: orderView.render({})
   });
 
   modal.open();
@@ -177,13 +160,11 @@ events.on('order:open', () => {
 // выбор способа оплаты
 events.on('order:payment-change', (data: { payment: TPayment }) => {
   buyerModel.setBuyerData({ payment: data.payment });
-  buyerModel.validate();
 });
 
 // события на ввод адреса доставки
 events.on('order.address:changed', (data: { field: string; value: string }) => {
   buyerModel.setBuyerData({ address: data.value });
-  buyerModel.validate();
 });
 
 // события на изменения в форме
@@ -196,9 +177,7 @@ events.on(
     orderView.payment = currentBuyerData.payment;
     orderView.address = currentBuyerData.address; //синхронизируем данные из модели ордер в view
 
-    const orderErrors: string[] = [];
-    if (errors.payment) orderErrors.push(errors.payment);
-    if (errors.address) orderErrors.push(errors.address);
+    const orderErrors = [errors.address, errors.payment].filter((error): error is string => Boolean(error));
 
     orderView.errors = orderErrors;
     orderView.valid = orderErrors.length === 0;
@@ -207,9 +186,7 @@ events.on(
     contactsView.email = currentBuyerData.email;
     contactsView.phone = currentBuyerData.phone; // так же само синхронизируем данный из модели
 
-    const contactsErrors: string[] = [];
-    if (errors.email) contactsErrors.push(errors.email);
-    if (errors.phone) contactsErrors.push(errors.phone);
+    const contactsErrors = [errors.email, errors.phone].filter((error): error is string => Boolean(error));
 
     contactsView.errors = contactsErrors;
     contactsView.valid = contactsErrors.length === 0;
@@ -256,12 +233,12 @@ events.on('contacts:submit', () => {
 
   service
     .postOrder(orderData)
-    .then(() => {
+    .then((res) => {
       basketModel.cleanBasket();
       buyerModel.clearBuyerData();
       modal.render({
         content: successView.render({
-          total: orderPrice,
+          total: res.total
         }),
       });
     })

@@ -1,6 +1,5 @@
 import { ensureElement } from '../../../utils/utils';
-import { Card } from './card';
-import { ICardActions, ICatalogCard } from './cardCatalog';
+import { CatalogCard, ICardActions, ICatalogCard } from './cardCatalog';
 
 interface ICardPreview extends ICatalogCard {
   description: string;
@@ -8,7 +7,7 @@ interface ICardPreview extends ICatalogCard {
   valid?: boolean;
 }
 
-export class CardPreview extends Card<ICardPreview> {
+export class CardPreview extends CatalogCard<ICardPreview> {
   protected textElement: HTMLElement;
   protected buyButton: HTMLButtonElement;
 

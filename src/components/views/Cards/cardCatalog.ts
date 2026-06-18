@@ -13,7 +13,7 @@ export interface ICardActions {
 
 type CategoryKey = keyof typeof categoryMap;
 
-export class CatalogCard extends Card<ICatalogCard> {
+export class CatalogCard<T= ICatalogCard> extends Card<T> {
   protected categoryElement: HTMLElement;
   protected imageElement: HTMLImageElement;
 
