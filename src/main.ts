@@ -65,8 +65,12 @@ events.on('items:changed', () => {
 //клик на карточку в каталоге, сохраняет выбранный товар для дальнейшего подробноо отображения
 events.on('card:select', (product: IProduct) => {
   productsModel.saveCurrentProduct(product);
+});
 
-  //определяем состояние кнопки покупки
+events.on('preview:changed', () => {
+  const product = productsModel.getCurrentProduct()
+  if(!product) return;  //да, я знаю, что у меня два одинаковых куска кода в обработчиках. Может быть стоило передать product в эмите в catalog.ts, но ругалась типизация. Так что надеюсь это некритично 
+//определяем состояние кнопки покупки
   let buttonText = 'Купить';
   let isButtonValid = true;
 
@@ -87,7 +91,9 @@ events.on('card:select', (product: IProduct) => {
     valid: isButtonValid,
   })});
   modal.open();
-});
+})  
+  
+
 
 events.on('preview:toggle-basket', () => {
   const product = productsModel.getCurrentProduct();
@@ -95,12 +101,10 @@ events.on('preview:toggle-basket', () => {
 
   if (basketModel.hasItemInBasket(product.id)) {
     basketModel.removeItem(product.id) //если товар в корзине есть - удаляем
-    cardPreview.render({ buttonText: 'Купить'}) // и сразу перерисовываем текст кнопки
   } else {
     basketModel.addItem(product) //  впротивном случае добавляем товар в корзину
-    cardPreview.render({buttonText: 'Удалить из корзины'}); // и снова меняем кнопку
   }
-
+  events.emit('preview:changed', product)
 })
 
 //функция рендеринга товаров в корзине. Вынес в отдельную функцию так как код используется и при открытии и при изменении корзины
@@ -185,10 +189,10 @@ events.on(
     // обработка шага 2 - заполнения формы контактов
     contactsView.email = currentBuyerData.email;
     contactsView.phone = currentBuyerData.phone; // так же само синхронизируем данный из модели
-
+    const hasContactsErrors = Boolean( eventData.data.email || eventData.data.phone )
     const contactsErrors = [errors.email, errors.phone].filter((error): error is string => Boolean(error));
 
-    contactsView.errors = contactsErrors;
+    contactsView.errors = hasContactsErrors ? contactsErrors : [];
     contactsView.valid = contactsErrors.length === 0;
   }
 );
@@ -196,12 +200,7 @@ events.on(
 // сабмит формы и переход к заполнению контактов
 events.on('order:submit', () => {
   modal.render({
-    content: contactsView.render({
-      email: '',
-      phone: '',
-      valid: false,
-      errors: [],
-    }),
+    content: contactsView.render({}),
   });
 });
 
